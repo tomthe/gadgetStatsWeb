@@ -33,6 +33,7 @@ export class DataSourcesComponent implements OnInit {
     this.db.run(sqlstr); // Run the query without returning anything
 
     var res = this.db.exec("SELECT * FROM hello");
+    console.log(res);
     /*
     [
       {columns:['a','b'], values:[[0,'hello'],[1,'world']]}
@@ -45,5 +46,21 @@ export class DataSourcesComponent implements OnInit {
     // Bind values to the parameters and fetch the results of the query
     var result = stmt.getAsObject({':aval' : 1, ':bval' : 'world'});
     console.log(result); // Will print {a:1, b:'world'}
+  }
+
+
+  loadDB(ev:any ){
+    console.log('load db...');
+    console.log('load db...', ev);
+    var f = ev.target.files[0];
+
+    console.log(f);
+    var r = new FileReader();
+    r.onload = ()=> {
+      console.log(r.result);
+      var Uints = new Uint8Array(r.result);
+      this.db = new SQL.Database(Uints);
+    };
+    r.readAsArrayBuffer(f);
   }
 }
