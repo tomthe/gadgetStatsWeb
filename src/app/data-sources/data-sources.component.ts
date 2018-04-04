@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import * as SQL from 'sql.js/js/sql.js';
 
 @Component({
   selector: 'app-data-sources',
@@ -7,9 +8,42 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DataSourcesComponent implements OnInit {
 
+  db:any;
+
   constructor() { }
 
   ngOnInit() {
+    this.testSQL();
   }
 
+
+  testSQL(){
+    
+    this.db = new SQL.Database();
+    console.log('baaaaaaaaaaa')
+    //this.db = SQL.sql.Database();
+
+    console.log('baabbbbbbbbb')
+    
+
+        
+    let sqlstr = "CREATE TABLE hello (a int, b char);";
+    sqlstr += "INSERT INTO hello VALUES (0, 'hello');"
+    sqlstr += "INSERT INTO hello VALUES (1, 'world');"
+    this.db.run(sqlstr); // Run the query without returning anything
+
+    var res = this.db.exec("SELECT * FROM hello");
+    /*
+    [
+      {columns:['a','b'], values:[[0,'hello'],[1,'world']]}
+    ]
+    */
+
+    // Prepare an sql statement
+    var stmt = this.db.prepare("SELECT * FROM hello WHERE a=:aval AND b=:bval");
+
+    // Bind values to the parameters and fetch the results of the query
+    var result = stmt.getAsObject({':aval' : 1, ':bval' : 'world'});
+    console.log(result); // Will print {a:1, b:'world'}
+  }
 }
