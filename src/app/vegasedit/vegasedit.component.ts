@@ -16,7 +16,7 @@ export class VegaseditComponent implements OnInit {
       "x": {"field": "datum", "type": "ordinal"},
       "y": {"field": "weeksteps", "type": "quantitative"}
     }
-  };`
+  }`
 
   @Output() vegaTextUpdate:EventEmitter<any> = new EventEmitter<any>();
 

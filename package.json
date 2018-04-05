@@ -25,6 +25,9 @@
     "core-js": "^2.4.1",
     "rxjs": "^5.5.6",
     "sql.js": "^0.5.0",
+    "vega": "^3.2.1",
+    "vega-embed": "^3.4.0",
+    "vega-lite": "^2.3.1",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {

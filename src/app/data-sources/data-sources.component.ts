@@ -14,7 +14,7 @@ export class DataSourcesComponent implements OnInit {
 
   sqlText:string = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
   from MI_BAND_ACTIVITY_SAMPLE
-  where (timestamp between strftime('%s','now','-80 days') and strftime('%s','now','-1 days'))
+  where (timestamp between strftime('%s','now','-44 days') and strftime('%s','now','-38 days'))
   group by timestamp/(3600*24*7);`;
 
   sqlResult = [];
@@ -86,6 +86,7 @@ export class DataSourcesComponent implements OnInit {
       result.push(row);
     }
     this.sqlResult = result;
+    this.emitData();
   }
 
   testBridgeDB(){
@@ -107,5 +108,6 @@ group by timestamp/(3600*24*7);`
     }
     console.log('result from testBridgeDB: ', result, this.objectKeys(result));
     this.sqlResult = result;
+    this.emitData();
   }
 }
