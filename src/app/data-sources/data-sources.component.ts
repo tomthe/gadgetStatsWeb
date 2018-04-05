@@ -19,7 +19,7 @@ export class DataSourcesComponent implements OnInit {
 
   sqlResult = [];
 
-  @Output() resultUpdate:EventEmitter = new EventEmitter();
+  @Output() resultUpdate:EventEmitter<any> = new EventEmitter<any>();
 
   constructor() { }
 

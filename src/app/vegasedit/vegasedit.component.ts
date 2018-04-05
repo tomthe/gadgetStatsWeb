@@ -9,9 +9,16 @@ import { Output } from '@angular/core';
 })
 export class VegaseditComponent implements OnInit {
 
-  vegaText ='';
+  vegaText =`{
+    "data": {"values":  _data_ },
+    "mark": "bar",
+    "encoding": {
+      "x": {"field": "datum", "type": "ordinal"},
+      "y": {"field": "weeksteps", "type": "quantitative"}
+    }
+  };`
 
-  @Output() vegaTextUpdate:EventEmitter = new EventEmitter();
+  @Output() vegaTextUpdate:EventEmitter<any> = new EventEmitter<any>();
 
   constructor() { }
 
