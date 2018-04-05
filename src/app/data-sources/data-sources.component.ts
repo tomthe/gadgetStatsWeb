@@ -8,7 +8,11 @@ import * as SQL from 'sql.js/js/sql.js';
 })
 export class DataSourcesComponent implements OnInit {
 
+  objectKeys = Object.keys;
+
   db:any;
+
+  sqlResult = [];
 
   constructor() { }
 
@@ -18,21 +22,21 @@ export class DataSourcesComponent implements OnInit {
 
 
   testSQL(){
-    
+
     this.db = new SQL.Database();
     console.log('baaaaaaaaaaa')
     //this.db = SQL.sql.Database();
 
     console.log('baabbbbbbbbb')
-    
 
-        
+
+
     let sqlstr = "CREATE TABLE hello (a int, b char);";
     sqlstr += "INSERT INTO hello VALUES (0, 'hello');"
     sqlstr += "INSERT INTO hello VALUES (1, 'world');"
     this.db.run(sqlstr); // Run the query without returning anything
 
-    var res = this.db.exec("SELECT * FROM hello");
+    let res = this.db.exec("SELECT * FROM hello");
     console.log(res);
     /*
     [
@@ -41,10 +45,10 @@ export class DataSourcesComponent implements OnInit {
     */
 
     // Prepare an sql statement
-    var stmt = this.db.prepare("SELECT * FROM hello WHERE a=:aval AND b=:bval");
+    let stmt = this.db.prepare("SELECT * FROM hello WHERE a=:aval AND b=:bval");
 
     // Bind values to the parameters and fetch the results of the query
-    var result = stmt.getAsObject({':aval' : 1, ':bval' : 'world'});
+    let result = stmt.getAsObject({':aval' : 1, ':bval' : 'world'});
     console.log(result); // Will print {a:1, b:'world'}
   }
 
@@ -55,12 +59,33 @@ export class DataSourcesComponent implements OnInit {
     var f = ev.target.files[0];
 
     console.log(f);
-    var r = new FileReader();
+    let r = new FileReader();
     r.onload = ()=> {
       console.log(r.result);
-      var Uints = new Uint8Array(r.result);
+      let Uints = new Uint8Array(r.result);
       this.db = new SQL.Database(Uints);
     };
     r.readAsArrayBuffer(f);
+  }
+
+  testBridgeDB(){
+
+    let sqlText = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
+from MI_BAND_ACTIVITY_SAMPLE
+where (timestamp between strftime('%s','now','-80 days') and strftime('%s','now','-1 days'))
+group by timestamp/(3600*24*7);`
+
+    //var stmt = this.db.prepare("SELECT * FROM hello WHERE a=:aval AND b=:bval");
+    let stmt = this.db.prepare(sqlText);
+
+    let result = [];
+
+    while(stmt.step()) { //
+      let row = stmt.getAsObject();
+      result.push(row);
+      // [...] do something with the row of result
+    }
+    console.log('result from testBridgeDB: ', result, this.objectKeys(result));
+    this.sqlResult = result;
   }
 }

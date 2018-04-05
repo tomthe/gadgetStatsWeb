@@ -4,3 +4,13 @@
 
 
 <label class="button">Load an SQLite database file: <input type='file' id='dbfile' (change)="loadDB($event)"></label>
+<button (click)="testBridgeDB()">testBridgeDB</button>
+
+<table *ngIf="sqlResult.length >0">
+  <tr>
+    <th *ngFor="let item of objectKeys(sqlResult[0])">{{item}}</th>
+  </tr>
+  <tr *ngFor="let row of sqlResult | slice:0:20">
+    <td *ngFor="let item of objectKeys(row)">{{row[item]}}</td>
+  </tr>
+</table>
