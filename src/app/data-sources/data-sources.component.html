@@ -1,12 +1,13 @@
-<p>
-  data-sources works!
-</p>
+
+<label class="w3-button">Load an SQLite database file: <input type='file' id='dbfile' (change)="loadDB($event)"></label>
+<button w3-button (click)="testBridgeDB()">testBridgeDB</button>
+
+<textarea class="w3-input w3-border" style="resize:none" rows="12"  [(ngModel)]="sqlText"></textarea>
 
 
-<label class="button">Load an SQLite database file: <input type='file' id='dbfile' (change)="loadDB($event)"></label>
-<button (click)="testBridgeDB()">testBridgeDB</button>
+<button w3-button (click)="executeSQLfromTextarea()">execute SQL</button>
 
-<table *ngIf="sqlResult.length >0">
+<table class="w3-table" *ngIf="sqlResult.length >0">
   <tr>
     <th *ngFor="let item of objectKeys(sqlResult[0])">{{item}}</th>
   </tr>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as SQL from 'sql.js/js/sql.js';
 
 @Component({
@@ -12,7 +12,14 @@ export class DataSourcesComponent implements OnInit {
 
   db:any;
 
+  sqlText:string = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
+  from MI_BAND_ACTIVITY_SAMPLE
+  where (timestamp between strftime('%s','now','-80 days') and strftime('%s','now','-1 days'))
+  group by timestamp/(3600*24*7);`;
+
   sqlResult = [];
+
+  @Output() resultUpdate:EventEmitter = new EventEmitter();
 
   constructor() { }
 
@@ -20,6 +27,9 @@ export class DataSourcesComponent implements OnInit {
     this.testSQL();
   }
 
+  emitData(){
+    this.resultUpdate.emit(this.sqlResult);
+  }
 
   testSQL(){
 
@@ -66,6 +76,16 @@ export class DataSourcesComponent implements OnInit {
       this.db = new SQL.Database(Uints);
     };
     r.readAsArrayBuffer(f);
+  }
+
+  executeSQLfromTextarea(){
+    let stmt = this.db.prepare(this.sqlText);
+    let result = [];
+    while(stmt.step()) { //
+      let row = stmt.getAsObject();
+      result.push(row);
+    }
+    this.sqlResult = result;
   }
 
   testBridgeDB(){
