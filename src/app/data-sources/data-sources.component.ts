@@ -1,4 +1,5 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import * as localforage from 'localforage';
 import * as SQL from 'sql.js/js/sql.js';
 
 @Component({
@@ -14,14 +15,14 @@ export class DataSourcesComponent implements OnInit {
 
   db:any;
 
-  sqlText:string = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
-  from MI_BAND_ACTIVITY_SAMPLE
-  where (timestamp between strftime('%s','now','-44 days') and strftime('%s','now','-38 days'))
-  group by timestamp/(3600*24*7);`;
+  @Input() sqlText:string = ``;
 
   sqlResult = [];
 
   @Output() resultUpdate:EventEmitter<any> = new EventEmitter<any>();
+  @Output() sqlTextUpdate:EventEmitter<any> = new EventEmitter<any>();
+
+  sqlError:string = '';
 
   constructor() { }
 
@@ -42,11 +43,14 @@ export class DataSourcesComponent implements OnInit {
       }
       return strings.join('');
     }
-    //try {
-      window.localStorage.setItem("db", toBinString(this.db.export()));
-    //} catch (error) {
-      console.log("tried to save to local-storage...failed! :(  ... your database is probably too big")
-    //}
+    try {
+      //localforage.setItem("db", toBinString(this.db.export())).then( () => {
+      localforage.setItem("db", this.db.export()).then( () => {
+        console.log("loaded Database successfully!");
+      });
+    } catch (error) {
+      console.log("tried to save to local-storage...failed! :(  ... your database is probably too big", error)
+    }
   }
 
   loadDbFromLocalStorage(){
@@ -58,15 +62,21 @@ export class DataSourcesComponent implements OnInit {
       return arr;
     }
     try {
-      this.db = new SQL.Database(toBinArray(localStorage.getItem("db")));
+      //this.db = new SQL.Database(toBinArray(localforage.getItem("db")));
+      this.db = new SQL.Database(localforage.getItem("db"));
+      console.log("loaded Database successfully!");
     } catch (error) {
-      console.log("tried to load from local-storage...failed! :(")
+      console.log("tried to load from local-storage...failed! :(", error)
     }
   }
 
 
   emitData(){
     this.resultUpdate.emit(this.sqlResult);
+  }
+
+  emitSqlText(){
+    this.sqlTextUpdate.emit(this.sqlText);
   }
 
 
@@ -78,7 +88,7 @@ export class DataSourcesComponent implements OnInit {
     console.log(f);
     let r = new FileReader();
     r.onload = ()=> {
-      console.log(r.result);
+      // console.log(r.result);
       let Uints = new Uint8Array(r.result);
       this.db = new SQL.Database(Uints);
       this.saveDbToLocalStorage();
@@ -87,16 +97,22 @@ export class DataSourcesComponent implements OnInit {
   }
 
   executeSQLfromTextarea(){
-    let stmt = this.db.prepare(this.sqlText);
-    let result = [];
-    while(stmt.step()) { //
-      let row = stmt.getAsObject();
-      result.push(row);
+    try {
+      let stmt = this.db.prepare(this.sqlText);
+      let result = [];
+      while(stmt.step()) { //
+        let row = stmt.getAsObject();
+        result.push(row);
+      }
+      this.sqlResult = result;
+      this.emitData();
+    } catch (error) {
+      this.sqlError = " \n" + error.toString();
     }
-    this.sqlResult = result;
-    this.emitData();
   }
 
+
+  /* deprecated:
   testBridgeDB(){
 
     let sqlText = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
@@ -117,5 +133,9 @@ group by timestamp/(3600*24*7);`
     console.log('result from testBridgeDB: ', result, this.objectKeys(result));
     this.sqlResult = result;
     this.emitData();
+  }
+  */
+  dissmissError(){
+    this.sqlError = '';
   }
 }

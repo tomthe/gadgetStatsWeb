@@ -3,10 +3,16 @@
 <input class="w3-check" type="checkbox" checked="checked" [(ngModel)]="boolSaveDatabaseInLocalStorage">
 <label>Save database to local storage</label>
 
-<textarea class="w3-input w3-border" style="resize:none" rows="12"  [(ngModel)]="sqlText"></textarea>
+<textarea class="w3-input w3-border" style="resize:none" rows="12"  [(ngModel)]="sqlText" (blur)="emitSqlText()"></textarea>
 
 
 <button w3-button (click)="executeSQLfromTextarea()">execute SQL</button>
+
+<div class="w3-panel w3-red" *ngIf="sqlError != ''">
+    <h3>SQLite Error!</h3>
+    <p>{{sqlError}}</p>
+    <button w3-button (click)="dissmissError()">OK</button>
+</div>
 
 <table class="w3-table" *ngIf="sqlResult.length >0">
   <tr>

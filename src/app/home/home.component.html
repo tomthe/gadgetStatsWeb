@@ -1,8 +1,35 @@
 <h1>GadgetStatsWeb</h1>
-<app-data-sources (resultUpdate)="updateData($event)"></app-data-sources>
 
-<app-vegasedit (vegaTextUpdate)="updateVegaText($event)"></app-vegasedit>
+<h3>Load and save a chart type</h3>
+<ul class="w3-ul w3-border">
+  <li><h2>Preset Chart Configurations</h2></li>
+  <li *ngFor="let item of presetChartConfigs" clickable (click)="loadPreset(item)">
+    {{item.name}}
+  </li>
+  <li><h2>Saved Chart Configurations</h2></li>
+  <li *ngFor="let item of savedChartConfigs"clickable (click)="loadPreset(item)">
+      {{item.name}}
+    </li>
+</ul>
 
+
+<div class="w3-container">
+  <h4>Save the current configuration in your browser:</h4>
+  <label>Configuration Name</label>
+  <input class="w3-input" type="text" [(ngModel)]="configName">
+  <button class="w3-btn w3-black" (click)="saveNewUserConfig()">Save</button>
+</div>
+
+<app-data-sources (resultUpdate)="updateData($event)" (sqlTextUpdate)="updateSqlText($event)" [sqlText]="sqlText"></app-data-sources>
+
+<app-vegasedit (vegaTextUpdate)="updateVegaText($event)" [vegaText]="vegaText"></app-vegasedit>
+
+
+<div class="w3-panel w3-red" *ngIf="vegaError != ''">
+    <h3>Vega-Charting-Definition-Error!</h3>
+    <p>{{vegaError}}</p>
+    <button w3-button (click)="vegaError=''">OK</button>
+</div>
 
 
 <button w3-button (click)="drawChart()">draw chart</button>
