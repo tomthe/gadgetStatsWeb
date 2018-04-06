@@ -1,6 +1,7 @@
 
 <label class="w3-button">Load an SQLite database file: <input type='file' id='dbfile' (change)="loadDB($event)"></label>
-<button w3-button (click)="testBridgeDB()">testBridgeDB</button>
+<input class="w3-check" type="checkbox" checked="checked" [(ngModel)]="boolSaveDatabaseInLocalStorage">
+<label>Save database to local storage</label>
 
 <textarea class="w3-input w3-border" style="resize:none" rows="12"  [(ngModel)]="sqlText"></textarea>
 

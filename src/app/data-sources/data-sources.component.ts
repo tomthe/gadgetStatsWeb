@@ -10,6 +10,8 @@ export class DataSourcesComponent implements OnInit {
 
   objectKeys = Object.keys;
 
+  boolSaveDatabaseInLocalStorage:boolean = true;
+
   db:any;
 
   sqlText:string = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
@@ -24,42 +26,47 @@ export class DataSourcesComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.testSQL();
+    if (this.boolSaveDatabaseInLocalStorage){
+        this.loadDbFromLocalStorage();
+    }
   }
+
+  saveDbToLocalStorage(){
+    // from https://github.com/kripken/sql.js/wiki/Persisting-a-Modified-Database
+    function toBinString (arr) {
+      var uarr = new Uint8Array(arr);
+      var strings = [], chunksize = 0xffff;
+      // There is a maximum stack size. We cannot call String.fromCharCode with as many arguments as we want
+      for (var i=0; i*chunksize < uarr.length; i++){
+        strings.push(String.fromCharCode.apply(null, uarr.subarray(i*chunksize, (i+1)*chunksize)));
+      }
+      return strings.join('');
+    }
+    //try {
+      window.localStorage.setItem("db", toBinString(this.db.export()));
+    //} catch (error) {
+      console.log("tried to save to local-storage...failed! :(  ... your database is probably too big")
+    //}
+  }
+
+  loadDbFromLocalStorage(){
+    // from: https://github.com/kripken/sql.js/wiki/Persisting-a-Modified-Database
+    function toBinArray (str) {
+      var l = str.length,
+          arr = new Uint8Array(l);
+      for (var i=0; i<l; i++) arr[i] = str.charCodeAt(i);
+      return arr;
+    }
+    try {
+      this.db = new SQL.Database(toBinArray(localStorage.getItem("db")));
+    } catch (error) {
+      console.log("tried to load from local-storage...failed! :(")
+    }
+  }
+
 
   emitData(){
     this.resultUpdate.emit(this.sqlResult);
-  }
-
-  testSQL(){
-
-    this.db = new SQL.Database();
-    console.log('baaaaaaaaaaa')
-    //this.db = SQL.sql.Database();
-
-    console.log('baabbbbbbbbb')
-
-
-
-    let sqlstr = "CREATE TABLE hello (a int, b char);";
-    sqlstr += "INSERT INTO hello VALUES (0, 'hello');"
-    sqlstr += "INSERT INTO hello VALUES (1, 'world');"
-    this.db.run(sqlstr); // Run the query without returning anything
-
-    let res = this.db.exec("SELECT * FROM hello");
-    console.log(res);
-    /*
-    [
-      {columns:['a','b'], values:[[0,'hello'],[1,'world']]}
-    ]
-    */
-
-    // Prepare an sql statement
-    let stmt = this.db.prepare("SELECT * FROM hello WHERE a=:aval AND b=:bval");
-
-    // Bind values to the parameters and fetch the results of the query
-    let result = stmt.getAsObject({':aval' : 1, ':bval' : 'world'});
-    console.log(result); // Will print {a:1, b:'world'}
   }
 
 
@@ -74,6 +81,7 @@ export class DataSourcesComponent implements OnInit {
       console.log(r.result);
       let Uints = new Uint8Array(r.result);
       this.db = new SQL.Database(Uints);
+      this.saveDbToLocalStorage();
     };
     r.readAsArrayBuffer(f);
   }
