@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import vegaEmbed, { vega } from 'vega-embed';
 import * as vegaLito from 'vega-lite';
@@ -50,12 +50,47 @@ export class HomeComponent implements OnInit {
           "y": {"field": "weeksteps", "type": "quantitative",
           "scale": {"type": "log"}}
         }
+      }`},{
+      'name':'Miband - Steps and Heart Rate for 4 days in one chart',
+      'sqlText':`select STEPS, timestamp, strftime('%Y-%m-%d %H:%M',timestamp, 'unixepoch')  as d2, HEART_RATE
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-5 days') and strftime('%s','now','-0 days'));`,
+      'vegaText':`{
+        "data": {"values":  _data_ ,
+    "format": {
+      "parse": {"d2": "utc:'%Y-%m-%d %H:%M'"}
+    }},
+        "width": 820,
+        "height": 920,
+"resolve":{"scale":{"y":"independent"}},
+"layer":[{
+        "mark": "bar",
+        "encoding": {
+          "x": {"field": "d2", "type": "temporal"},
+          "y": {"field": "STEPS", "type": "quantitative",
+          "scale": {"type": "linear"}},
+ "color": {"value": "#0099cc"}
+        }},
+        {
+        "mark": "circle",
+        "encoding": {
+          "x": {"field": "d2", "type": "temporal"},
+          "y": {"field": "HEART_RATE", "type": "quantitative",
+             "scale": {"type": "linear"}
+           },
+         "color":{"value":"#ccaa00"}
+          }
+        }
+]
       }`},
 
   ]
   savedChartConfigs = [];
 
   vegaError = '';
+
+  
+  @ViewChild('dataSource') dataSource;
 
   constructor() { }
 
@@ -70,6 +105,7 @@ export class HomeComponent implements OnInit {
 
   updateData(event){
     this.data = event;
+    this.drawChart();
   }
 
   updateSqlText(event) {
@@ -79,6 +115,7 @@ export class HomeComponent implements OnInit {
   loadPreset(preset){
     this.sqlText = preset.sqlText;
     this.vegaText = preset.vegaText;
+    this.dataSource.executeSQLfromTextarea();
   }
 
   drawChart(){
@@ -116,18 +153,6 @@ export class HomeComponent implements OnInit {
       .initialize('#view') // initialize view within parent DOM container
       .hover()             // enable hover encode set processing
       .run();
-
-
-    /*
-    let opt = {
-      "mode": 'vega-lite'
-    };
-
-    vegaEmbed('#vis', spec, opt).then(function(result) {
-      // access view as result.view
-      console.log("embedded", result);
-    }).catch(console.error);
-*/
 
   }
 
