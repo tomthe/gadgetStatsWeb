@@ -15,10 +15,7 @@ export class HomeComponent implements OnInit {
   configName = 'new';
   data = [];
   vegaText = '';
-  sqlText = `select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
-  from MI_BAND_ACTIVITY_SAMPLE
-  where (timestamp between strftime('%s','now','-44 days') and strftime('%s','now','-38 days'))
-  group by timestamp/(3600*24*7);`;
+  sqlText = ``;
   presetChartConfigs = [{
     'name':'Steps per minute',
     'sqlText':`select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
@@ -96,6 +93,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.loadChartConfigsFromLocalStorage();
+    this.loadPreset(this.presetChartConfigs[0],false);
   }
 
   updateVegaText(event){
@@ -112,10 +110,12 @@ export class HomeComponent implements OnInit {
     this.sqlText = event;
   }
 
-  loadPreset(preset){
+  loadPreset(preset, createChart=true){
     this.sqlText = preset.sqlText;
     this.vegaText = preset.vegaText;
-    this.dataSource.executeSQLfromTextarea();
+    if (createChart){
+      this.dataSource.executeSQLfromTextarea();
+    }
   }
 
   drawChart(){
