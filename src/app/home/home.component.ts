@@ -85,7 +85,8 @@ export class HomeComponent implements OnInit {
   savedChartConfigs = [];
 
   vegaError = '';
-
+  showSave:boolean=false;
+  
   
   @ViewChild('dataSource') dataSource;
 
@@ -103,7 +104,7 @@ export class HomeComponent implements OnInit {
 
   updateData(event){
     this.data = event;
-    this.drawChart();
+    this.drawChart(event);
   }
 
   updateSqlText(event) {
@@ -118,14 +119,15 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  drawChart(){
+  drawChart(sdata=this.data){
     //console.log('this.vegaText',this.vegaText);
     //console.log('data to string: ', this.data.toString(), JSON.stringify(this.data));
     //console.log('data:', this.data);
     let spec:any;
     let vegaspec:any;
+    this.vegaError = "";
     try {
-      spec = this.vegaText.replace('_data_',JSON.stringify(this.data));
+      spec = this.vegaText.replace('_data_',JSON.stringify(sdata));
       vegaspec = vegaLito.compile(JSON.parse(spec)).spec;
     } catch (error) {
       console.log(error);

@@ -71,8 +71,8 @@ export class DataSourcesComponent implements OnInit {
   }
 
 
-  emitData(){
-    this.resultUpdate.emit(this.sqlResult);
+  emitData(sqlResult){
+    this.resultUpdate.emit(sqlResult);
   }
 
   emitSqlText(){
@@ -105,10 +105,55 @@ export class DataSourcesComponent implements OnInit {
         result.push(row);
       }
       this.sqlResult = result;
-      this.emitData();
+      this.emitData(result);
     } catch (error) {
       this.sqlError = " \n" + error.toString();
     }
+  }
+
+
+
+  async computeRestingHeartRate(){
+
+    let sqlText = "";
+    this.sqlText = `
+select HEART_RATE, datetime(timestamp, 'unixepoch') as datum, timestamp
+from MI_BAND_ACTIVITY_SAMPLE
+where HEART_RATE between 20 and 200
+and date(datetime(timestamp+3600*6, 'unixepoch'))=date('now', '-$$$  days')
+order by HEART_RATE
+LIMIT 1
+OFFSET 30`;
+
+
+    let ndays = 10;//this.ndays;
+    //let startDays = moment().diff(moment(this.dateStart),'days').toString();
+    let endDays = 5;// moment().diff(moment(this.dateEnd),'days');
+    let startDays = Number(endDays) + ndays;
+    console.log("Compute Resting Heart Rate:", startDays, endDays);
+
+    let rows = [];
+    for(let i=startDays;i>endDays;i--){
+      try{
+        console.log("hä?",i)
+        sqlText= this.sqlText.replace('$$$',i.toString());
+        console.log(i, 'i, sql: ',sqlText);
+        
+        let stmt = this.db.prepare(sqlText);
+        let result = [];
+        while(stmt.step()) { //
+          let row = stmt.getAsObject();
+          result.push(row);
+          console.log("..- ",i,row);
+        }
+        rows.push(result[0]);
+      } catch(err) {
+        console.log('error in for-loop',err)
+      }
+    }
+    console.log('rows: ', rows);
+    this.sqlResult = rows;
+    this.emitData(rows);
   }
 
 
