@@ -16,26 +16,340 @@ export class HomeComponent implements OnInit {
   data = [];
   vegaText = '';
   sqlText = ``;
-  presetChartConfigs = [{
-    'name':'Steps per minute',
-    'sqlText':`select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
-    from MI_BAND_ACTIVITY_SAMPLE
-    where (timestamp between strftime('%s','now','-44 days') and strftime('%s','now','-38 days'))
-    group by timestamp/(3600*24*7);`,
-    'vegaText':`{
-      "data": {"values":  _data_ },
-      "mark": "bar",
-      "width": 820,
-      "height": 620,
-      "encoding": {
-        "x": {"field": "datum", "type": "ordinal"},
-        "y": {"field": "weeksteps", "type": "quantitative"}
-      }
-    }`},{
+  presetChartConfigs = [
+    
+    {
+      'name':'Intensity and Steps per Minute',
+      'sqlText':`select raw_intensity as intensity, STEPS as steps, datetime(timestamp, 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-1 days') and strftime('%s','now','-0 days'));`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "steps", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }},
+          {
+          "mark": "line",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "intensity", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#ccaa00"}
+            }
+          }
+  ]
+      }`},
+    
+    
+    
+    {
+      'name':'Steps, Heart-Rate and Intensity per Minute',
+      'sqlText':`select HEART_RATE as hr, raw_intensity as intensity, STEPS as steps, datetime(timestamp, 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-2 days') and strftime('%s','now','-0 days'));`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "steps", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }},
+          {
+          "mark": "line",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "intensity", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#ccaa00"}
+            }
+          },
+          {
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "hr", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#FF33DD"}
+            }
+          }
+  ]
+      }`},
+      {
+      'name':'10 Minute Average',
+      'sqlText':`select avg(HEART_RATE) as hr, avg(raw_intensity) as intensity, avg(STEPS) as steps, datetime(avg(timestamp), 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-3 days') and strftime('%s','now','-0 days'))
+group by timestamp/600;`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "steps", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }},
+          {
+          "mark": "line",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "intensity", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#ccaa00"}
+            }
+          },
+          {
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "hr", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#FF33DD"}
+            }
+          }
+  ]
+      }`},
+      {
+      'name':'Steps and Intensity per Day',
+      'sqlText':`select avg(raw_intensity) as intensity, sum(STEPS) as steps, datetime(avg(timestamp), 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-30 days') and strftime('%s','now','-0 days'))
+group by timestamp/(3600*24);`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "steps", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }},
+          {
+          "mark": "line",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "intensity", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#ccaa00"}
+            }
+          }
+  ]
+      }`},
+      {
+      'name':'everything and Kind per Minute',
+      'sqlText':`select RAW_KIND as kind, HEART_RATE as hr, raw_intensity as intensity, STEPS as steps, datetime(timestamp, 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-.3 days') and strftime('%s','now','-0 days'));`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "steps", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }},
+          {
+          "mark": "line",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "intensity", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#ccaa00"}
+            }
+          },
+          {
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "hr", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#FF33DD"}
+            }
+          },
+          {
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "kind", "type": "quantitative",
+               "scale": {"type": "linear"}
+             },
+           "color":{"value":"#00FFDD"}
+            }
+          }
+  ]
+      }`},
+      {
+      'name':'Hours of Sleep last Month',
+      'sqlText':`select count(RAW_KIND)/60.0 as hoursleep,  datetime(timestamp, 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (RAW_KIND = 112) and (timestamp between strftime('%s','now','-30 days') and strftime('%s','now','-0 days'))
+group by timestamp/(3600*24);`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "width": 820,
+        "height": 620,
+  "resolve":{"scale":{"y":"independent"}},
+  "layer":[{
+          "mark": "bar",
+          "encoding": {
+            "x": {"field": "datum", "type": "temporal"},
+            "y": {"field": "hoursleep", "type": "quantitative",
+            "scale": {"type": "linear"}},
+   "color": {"value": "#0099cc"}
+          }}
+  ]
+      }`},
+
+      {
+        'name':'Hours of Sleep and minimal Heart Rate',
+        'sqlText':`select min(HEART_RATE) as minhr, count(RAW_KIND)/60.0 as hoursleep,  datetime(timestamp, 'unixepoch') as datum, timestamp
+        from MI_BAND_ACTIVITY_SAMPLE
+        where (RAW_KIND = 112 or RAW_KIND = 122) and (timestamp between strftime('%s','now','-30 days') and strftime('%s','now','-0 days'))
+  group by timestamp/(3600*24);`,
+        'vegaText':`{
+          "data": {"values":  _data_ },
+          "width": 820,
+          "height": 620,
+    "resolve":{"scale":{"y":"independent"}},
+    "layer":[{
+            "mark": "bar",
+            "encoding": {
+              "x": {"field": "datum", "type": "temporal"},
+              "y": {"field": "hoursleep", "type": "quantitative",
+              "scale": {"type": "linear"}},
+     "color": {"value": "#0099cc"}
+            }},
+  {
+            "mark": "circle",
+            "encoding": {
+              "x": {"field": "datum", "type": "temporal"},
+              "y": {"field": "minhr", "type": "quantitative",
+              "scale": {"type": "linear"}},
+     "color": {"value": "#FF3344"}
+            }}
+    ]
+        }`},
+        {
+        'name':'Intensity Histogramm',
+        'sqlText':`select raw_intensity as intensity, count(*) as c1,  datetime(timestamp, 'unixepoch') as datum, timestamp
+        from MI_BAND_ACTIVITY_SAMPLE
+        where (RAW_KIND = 112 or RAW_KIND = 122) and (timestamp between strftime('%s','now','-5 days') and strftime('%s','now','-0 days'))
+  group by raw_intensity;`,
+        'vegaText':`{
+          "data": {"values":  _data_ },
+          "width": 820,
+          "height": 620,
+    "resolve":{"scale":{"y":"independent"}},
+    "layer":[{
+            "mark": "bar",
+            "encoding": {
+              "x": {"field": "intensity", "type": "quantitative"},
+              "y": {"field": "c1", "type": "quantitative",
+              "scale": {"type": "log"}},
+     "color": {"value": "#0099cc"}
+            }}
+    ]
+        }`},
+        {
+        'name':'Steps Histogram',
+        'sqlText':`select steps as steps, count(*) +1 as c1,  datetime(timestamp, 'unixepoch') as datum, timestamp
+        from MI_BAND_ACTIVITY_SAMPLE
+        where (timestamp between strftime('%s','now','-5 days') and strftime('%s','now','-0 days'))
+  group by steps;`,
+        'vegaText':`{
+          "data": {"values":  _data_ },
+          "width": 820,
+          "height": 620,
+    "resolve":{"scale":{"y":"independent"}},
+    "layer":[{
+            "mark": "bar",
+            "encoding": {
+              "x": {"field": "steps", "type": "quantitative"},
+              "y": {"field": "c1", "type": "quantitative",
+              "scale": {"type": "log"}},
+     "color": {"value": "#0099cc"}
+            }}
+    ]
+        }`},
+        {
+        'name':'Resting Heart Rate',
+        'sqlText':`select min(hr) as mhr,datetime(avg(timestamp), 'unixepoch') as datum, timestamp from
+        (select avg(HEART_RATE) as hr, datetime(avg(timestamp), 'unixepoch') as datum, timestamp from MI_BAND_ACTIVITY_SAMPLE
+        where (timestamp between strftime('%s','now','-30 days') and strftime('%s','now','-0 days'))
+        group by timestamp/600)
+        group by timestamp/(3600*24);`,
+        'vegaText':`{
+          "data": {"values":  _data_ },
+          "width": 820,
+          "height": 620,
+    "resolve":{"scale":{"y":"independent"}},
+    "layer":[{
+            "mark": "bar",
+            "encoding": {
+              "x": {"field": "datum", "type": "temporal"},
+              "y": {"field": "mhr", "type": "quantitative",
+              "scale": {"type": "linear"}},
+     "color": {"value": "#0099cc"}
+            }}
+    ]
+        }`},
+
+      {
+      'name':'Steps per minute',
+      'sqlText':`select SUM(STEPS) as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
+      from MI_BAND_ACTIVITY_SAMPLE
+      where (timestamp between strftime('%s','now','-5 days') and strftime('%s','now','-0 days'))
+      group by timestamp/(3600*24*7);`,
+      'vegaText':`{
+        "data": {"values":  _data_ },
+        "mark": "bar",
+        "width": 820,
+        "height": 620,
+        "encoding": {
+          "x": {"field": "datum", "type": "ordinal"},
+          "y": {"field": "weeksteps", "type": "quantitative"}
+        }
+      }`},
+      {
       'name':'StepsPerHour-Logarithmic',
       'sqlText':`select SUM(STEPS)+1 as weeksteps, date(ROUND(AVG(timestamp)), 'unixepoch') as datum, timestamp
       from MI_BAND_ACTIVITY_SAMPLE
-      where (timestamp between strftime('%s','now','-65 days') and strftime('%s','now','-0 days'))
+      where (timestamp between strftime('%s','now','-50 days') and strftime('%s','now','-0 days'))
       group by timestamp/(3600);`,
       'vegaText':`{
         "data": {"values":  _data_ },
