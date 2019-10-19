@@ -1,4 +1,4 @@
-# Gadgetstatsvegas
+# GadgetstatsWeb
 
 Live demo: https://theilemail.de/gadgetstats/
 
